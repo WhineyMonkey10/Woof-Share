@@ -7,7 +7,7 @@ from pymongo import MongoClient
 import datetime
 
 # Initializing the database
-mongostring = "string"
+mongostring = ""
 client = MongoClient(mongostring)
 
 # Defining the database
@@ -23,22 +23,26 @@ class Database:
         # Connect to the database
         db = client["dogshare"]
         collection = db["users"]
-
         # Add user to the database
         try:
-            collection.insert_one({
-            "language": language,
-            "username": username,
-            "name": name,
-            "email": email,
-            "password": password,
-            "phone": phone,
-            "address": address,
-            "zip": zip,
-        })
+            # Check if the user already exists
+            if collection.find_one({"username": username}):
+                return "User already exists"
+            else:
+                collection.insert_one({
+                "language": language,
+                "username": username,
+                "name": name,
+                "email": email,
+                "password": password,
+                "phone": phone,
+                "address": address,
+                "zip": zip,
+            })
+                return "User added"
 
         except:
-            return ("Exited with error code 1: User not added")
+                return ("Exited with error code 1: User not added")
 
     # Function to find a user in the database
     def find_user(username):
@@ -179,16 +183,55 @@ class Database:
                 return dogs
             except:
                 return ("Exited with error code 9: Dogs not sorted")
+    
+    def find_dog_by_name(dog_name):
+        # Find dog in MongoDB database
+        # Connect to the database
+        db = client["dogshare"]
+        collection = db["users"]
+
+        # Find owner dog in the database
+        try:
+            dog = collection.find_one({"dog_name": dog_name})
+            # Sort the data of the user and delete all non-dog data
+            dog.pop("language")
+            dog.pop("username")
+            dog.pop("name")
+            dog.pop("email")
+            dog.pop("password")
+            dog.pop("phone")
+            dog.pop("address")
+            dog.pop("zip")
+            return dog
+        except:
+            return ("Exited with error code 10: Dog not found")
+    
+    def loginUser(username, password):
+        # Find user in MongoDB database
+        # Connect to the database
+        db = client["dogshare"]
+        collection = db["users"]
+
+        # Find user in the database
+        try:
+            if collection.find_one({"username": username, "password": password}):
+                    return "True"
+            else:
+                return "Either the username or password is incorrect"
+        except:
+            return "Exited with error code 34: User not found"
+            
+    
+    
     def testConnection():
         try:
             db = client["dogshare"]
             collection = db["users"]
             if collection.find_one({"username": "testConnection"}):
-                return "Connection successful"
+                return "Connection successful"     
             else:
-                return("Unable to connect to database (error code 10)")
-            
+                return "Unable to connect to database (error code 11)"
         except:
-            return ("Unable to connect to database (error code 10.1)")
+            return ("Unable to connect to database (error code 11.1)")
     # More functions to come
     
