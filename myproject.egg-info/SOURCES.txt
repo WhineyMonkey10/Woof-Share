@@ -1,0 +1,11 @@
+setup.py
+myproject.egg-info/PKG-INFO
+myproject.egg-info/SOURCES.txt
+myproject.egg-info/dependency_links.txt
+myproject.egg-info/top_level.txt
+src/__init__.py
+src/handlers/__init__.py
+src/handlers/database/__init__.py
+src/handlers/database/database.py
+src/main/__init__.py
+src/main/cli.py
