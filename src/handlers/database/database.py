@@ -7,7 +7,9 @@ from pymongo import MongoClient
 import datetime
 
 # Initializing the database
-mongostring = ""
+mongostring = "string"
+if mongostring == "":
+    raise Exception("MongoDB connection string not found")
 client = MongoClient(mongostring)
 
 # Defining the database
@@ -27,7 +29,7 @@ class Database:
         try:
             # Check if the user already exists
             if collection.find_one({"username": username}):
-                return "User already exists"
+                return False
             else:
                 collection.insert_one({
                 "language": language,
@@ -215,14 +217,116 @@ class Database:
         # Find user in the database
         try:
             if collection.find_one({"username": username, "password": password}):
-                    return "True"
+                    return True
             else:
                 return "Either the username or password is incorrect"
         except:
             return "Exited with error code 34: User not found"
+    
+    def addKeeper(username, day):
+        # Add keeper to MongoDB database
+        # Connect to the database
+        db = client["dogshare"]
+        collection = db["users"]
+
+        # Update the user's account in the database, mentioning that they are a keeper, and return the user's _id
+        try:
+            collection.update_one({"username": username}, {"$set": {"keeper": day}})
+            userid = collection.find_one({"username": username, "_id": 1})
+            return userid
+        except:
+            raise Exception("Exited with error code 11: Keeper not added, or user not found. Verify that the username is correct.")
             
+    # Find someone who can keep your dog on a certain day
+    def findKeeper(day):
+        # Find keeper in MongoDB database
+        # Connect to the database
+        db = client["dogshare"]
+        collection = db["users"]
+        
+        # Make the day lowercase, just as a failsafe
+        try:
+            day = day.lower()
+        except:
+            raise Exception("Inputted data is most likely a NoneType. (findKeeper function)")
+
+        # Find keeper in the database
+        try:
+            keeper = collection.find_one({"keeper": day})
+            # Return the keeper's username & _id if a keeper is found
+            if keeper:
+                return keeper["username"], keeper["_id"]
+            else:
+                return False
+            
+        except:
+            raise Exception("Exited with error code 12: Keeper not found")
     
+    # Change your settings in the database
+    def changeSettings(setting, username, value):
+        # Change settings in MongoDB database
+        # Connect to the database
+        db = client["dogshare"]
+        collection = db["users"]
+        
+        # Change the setting in the database
+        try:
+            collection.update_one({"username": username}, {"$set": {setting: value}})
+            return True
+        except:
+            raise Exception("Exited with error code 13: Setting not changed")
     
+    # Make a function to delete keeprs. This is used when a keeper is no longer available on a certain day or if the day has passed in the week
+    def deleteKeeper(username, sorttype):
+        # Delete keeper in MongoDB database
+        db = client["dogshare"]
+        collection = db["users"]
+        if sorttype == "manual":
+            try:
+                collection.update_one({"username": username}, {"$unset": {"keeper": ""}})
+                return True
+            except:
+                raise Exception("Exited with error code 14: Keeper not deleted")
+        # Check if the day the keeper is available is today or in the past
+        elif sorttype == "automatic":
+            try:
+                currentday = datetime.datetime.today().weekday()
+                keeperday = collection.find({"username": username}, {"keeper": 1})
+                if keeperday == "monday" and currentday > 0:
+                    collection.update_one({"username": username}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database."
+                elif keeperday == "tuesday" and currentday > 1:
+                    collection.update_one({"username: username"}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database."
+                elif keeperday == "wednesday" and currentday > 2:
+                    collection.update_one({"username: username"}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database."
+                elif keeperday == "thursday" and currentday > 3:
+                    collection.update_one({"username: username"}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database."
+                elif keeperday == "friday" and currentday > 4:
+                    collection.update_one({"username: username"}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database."  
+                elif keeperday == "saturday" and currentday > 5:
+                    collection.update_one({"username: username"}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database."
+                elif keeperday == "sunday" and currentday > 6:
+                    collection.update_one({"username: username"}, {"$unset": {"keeper": ""}})
+                    Database.Log.log(username, "Keeper deleted automatically because the day has passed", None)
+                    return "This keeper's day has passed, and they have been removed from the database." 
+                else:
+                    Database.Log.log(None, None, "Keeper not deleted (error)")
+                    raise Exception("Exited with error code 15: Keeper not deleted")
+                    
+            except:
+                Database.Log.log(None, None, "Keeper not deleted (error)")
+                raise Exception("Exited with error code 15: Keeper not deleted")
     def testConnection():
         try:
             db = client["dogshare"]
@@ -233,5 +337,31 @@ class Database:
                 return "Unable to connect to database (error code 11)"
         except:
             return ("Unable to connect to database (error code 11.1)")
+    
+    class Log:
+        # Log all actions in the database, along with the user's username, the action, and the time and errors
+        def log(username, action, error):
+            # Connect to the database
+            db = client["dogshare"]
+            collection = db["logs"]
+            # Log the action
+            if error == None:
+                try:
+                    collection.insert_one({"username": username, "action": action, "error": error, "time": datetime.datetime.now()})
+                    return True
+                except:
+                    return ("Exited with error code 16: Log not added")
+            elif error != None and username == None and action == None:
+                try:
+                    collection.insert_many({"error": error, "time": datetime.datetime.now()})
+                    return True
+                except:
+                    return ("Exited with error code 17: Log not added")
+    
+    
+    
+    
     # More functions to come
+    
+    
     
