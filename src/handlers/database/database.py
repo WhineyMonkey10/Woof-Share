@@ -5,6 +5,7 @@ import sys
 import os
 from pymongo import MongoClient
 import datetime
+import hashlib
 
 # Initializing the database
 mongostring = "string"
@@ -27,6 +28,11 @@ class Database:
         collection = db["users"]
         # Add user to the database
         try:
+            
+            # Hash the password
+            
+            password = hashlib.sha256(password.encode()).hexdigest()
+            
             # Check if the user already exists
             if collection.find_one({"username": username}):
                 return False
@@ -213,6 +219,9 @@ class Database:
         # Connect to the database
         db = client["dogshare"]
         collection = db["users"]
+        
+        # Hash the password to check if it matches the one in the database
+        password = hashlib.sha256(password.encode()).hexdigest()
 
         # Find user in the database
         try:
