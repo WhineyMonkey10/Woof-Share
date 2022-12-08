@@ -29,10 +29,10 @@ def home():
 def findsitter():
     # Get the data from the form
     day  = request.form['day']
-    # Check if a keeper is available
+    # Check if a data is available
     data = Database.findKeeper(day)
     if data == False:
-        successmessage = "Sadly there are no keepers available on this day."
+        successmessage = "Sadly there are no keeper available on this day."
     if data != False:
         successmessage = f"Hooray! There is a keeper available on the day {day}! Here is their information: {data}"
     return render_template('findsitter.html', data=successmessage)

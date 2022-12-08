@@ -210,6 +210,7 @@ class Database:
             dog.pop("phone")
             dog.pop("address")
             dog.pop("zip")
+            dog.pop("keeper")
             return dog
         except:
             return ("Exited with error code 10: Dog not found")
@@ -252,6 +253,7 @@ class Database:
         # Connect to the database
         db = client["dogshare"]
         collection = db["users"]
+        keepers = {}
         
         # Make the day lowercase, just as a failsafe
         try:
@@ -259,18 +261,17 @@ class Database:
         except:
             raise Exception("Inputted data is most likely a NoneType. (findKeeper function)")
 
-        # Find keeper in the database
+        # Find keeper in the database and return a list with all the data. Only keep the keepers username and id
         try:
-            keeper = collection.find_one({"keeper": day})
-            # Return the keeper's username & _id if a keeper is found
-            if keeper:
-                return keeper["username"], keeper["_id"]
-            else:
-                return False
-            
+            for keeper in collection.find({"keeper": day}):
+                keepers.update({keeper["username"]: keeper["_id"]})
+            if keepers == {}:
+                keepers = False
+            return keepers
         except:
             raise Exception("Exited with error code 12: Keeper not found")
-    
+        
+        
     # Change your settings in the database
     def changeSettings(setting, username, value):
         # Change settings in MongoDB database
@@ -371,6 +372,4 @@ class Database:
     
     
     # More functions to come
-    
-    
     
