@@ -9,7 +9,8 @@
 <body>
     <!-- Registration page-->
     <h1>Register to Woof Share</h1>
-    <form action="/register" method="post">
+    <h5>{{ data }}</h5>
+    <form action="{{ url_for('register') }}" method="post">
         <label for="username">Username</label>
         <input type="text" name="username" id="username">
         <label for="password">Password</label>

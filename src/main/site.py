@@ -55,4 +55,21 @@ def login():
         return render_template('findsitter.html', data=successmessage, status=status)
     return render_template('login.html', data=successmessage, status=status)
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # Get the data from the form
+    username = request.form['username']
+    password = request.form['password']
+    
+    # Check if a data is available
+    data = Database.registerUser(username, password)
+    if data == False:
+        successmessage = "This username is already taken."
+        status = "Registration failed"
+    if data != False:
+        successmessage = "Thank you for registering!"
+        status = "Registration success"
+        return render_template('findsitter.html', data=successmessage, status=status)
+    return render_template('login.html', data=successmessage, status=status)
+
 app.run()
