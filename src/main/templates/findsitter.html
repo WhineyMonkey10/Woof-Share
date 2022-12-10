@@ -4,9 +4,27 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitter Found!</title>
+    <title>Find someone to keep your dog</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css') }}">
+    
 </head>
 <body>
-    <h1>{{ data }}</h1>
+    <!-- A form that asks you for your username and waht day you need the sitter for. Then, sends the data back to flask. -->
+    <form action="{{ url_for('findsitter') }}" method="post">
+        <div class="container">
+            <label for="username"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" name="username" required>
+    
+            <label for="day"><b>Day</b></label>
+            <input type="text" placeholder="Enter day" name="day" id="day" required>
+    
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+    
+    <!-- This is where the message will be displayed -->
+    <h2> {{ message }}</h2>
+    <p> {{ dogFound }}</p>
+    <p> {{ dogFound }}</p>
 </body>
 </html>

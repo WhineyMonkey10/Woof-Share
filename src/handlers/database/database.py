@@ -8,7 +8,7 @@ import datetime
 import hashlib
 
 # Initializing the database
-mongostring = "string"
+mongostring = ""
 if mongostring == "":
     raise Exception("MongoDB connection string not found")
 client = MongoClient(mongostring)
@@ -229,7 +229,7 @@ class Database:
             if collection.find_one({"username": username, "password": password}):
                     return True
             else:
-                return "Either the username or password is incorrect"
+                return False
         except:
             return "Exited with error code 34: User not found"
     
