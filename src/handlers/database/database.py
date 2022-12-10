@@ -1,4 +1,4 @@
-# File defining all database classes and functions for ease of use in other files, I tried MySQl but it was too complicated, so obviously, I went with my good friend MongoDB
+# File defining all database classes and functions for ease of use in other files, I tried MySQl but it was too complicated, so obviously, I went with my good friend MongoDB.
 
 # Importing the necessary modules
 import sys
